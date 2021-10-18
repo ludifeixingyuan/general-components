@@ -21,7 +21,7 @@ import java.util.Properties;
  */
 @Slf4j
 @Intercepts({@Signature(type = Executor.class, method = Constants.UPDATE, args = {MappedStatement.class, Object.class})})
-public class OpChangeLogInterceptor implements Interceptor {
+public class OperationLogInterceptor implements Interceptor {
 
     @Resource
     ChangeLogsMapper changeLogsMapper;

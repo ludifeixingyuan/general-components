@@ -6,7 +6,7 @@ package com.pilot.log.handler;
  * @author ludifeixingyuan
  * @date 2021-10-18
  */
-public abstract class AbstractOpHandler {
+public abstract class AbstractOperationHandler {
 
     /**
      * 操作前，需要处理的
