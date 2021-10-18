@@ -1,4 +1,4 @@
-package com.fxy.log;
+package com.pilot.log;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
