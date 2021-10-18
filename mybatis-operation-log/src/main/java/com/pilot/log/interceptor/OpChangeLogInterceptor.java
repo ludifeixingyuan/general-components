@@ -1,10 +1,17 @@
 package com.pilot.log.interceptor;
 
-import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
+import com.pilot.log.constants.Constants;
+import com.pilot.log.dao.ChangeLogsMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.executor.Executor;
+import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.plugin.Interceptor;
+import org.apache.ibatis.plugin.Intercepts;
+import org.apache.ibatis.plugin.Invocation;
+import org.apache.ibatis.plugin.Signature;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.annotation.Resource;
+import java.util.Properties;
 
 /**
  * 操作变更日志拦截器
@@ -12,25 +19,20 @@ import javax.servlet.http.HttpServletResponse;
  * @author ludifeixingyuan
  * @date 2021-10-18
  */
-public class OpChangeLogInterceptor implements HandlerInterceptor {
+@Slf4j
+@Intercepts({@Signature(type = Executor.class, method = Constants.UPDATE, args = {MappedStatement.class, Object.class})})
+public class OpChangeLogInterceptor implements Interceptor {
+
+    @Resource
+    ChangeLogsMapper changeLogsMapper;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-            throws Exception {
-        System.out.println("Interceptor preHandle:请求前调用");
-        //返回 false 则请求中断
-        return true;
+    public Object intercept(Invocation invocation) throws Throwable {
+        return null;
     }
 
     @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-                           ModelAndView modelAndView) throws Exception {
-        System.out.println("Interceptor postHandle:请求后调用");
-    }
+    public void setProperties(Properties properties) {
 
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
-            throws Exception {
-        System.out.println("Interceptor afterCompletion:请求调用完成后回调方法，即在视图渲染完成后回调");
     }
 }
