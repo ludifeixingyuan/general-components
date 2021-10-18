@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface OPChangeLog {
+public @interface OperationLog {
 
     /**
      * 表名
