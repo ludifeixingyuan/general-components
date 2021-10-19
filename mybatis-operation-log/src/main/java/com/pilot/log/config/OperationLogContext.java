@@ -19,7 +19,7 @@ import java.util.Objects;
 /**
  * 操作日志对象定义
  *
- * @author wangzongbin
+ * @author ludifeixingyuan
  * @date 2021-10-18
  */
 @Data
