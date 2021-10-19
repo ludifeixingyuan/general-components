@@ -9,6 +9,7 @@ import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.plugin.Intercepts;
 import org.apache.ibatis.plugin.Invocation;
 import org.apache.ibatis.plugin.Signature;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.Resource;
 import java.util.Properties;
@@ -23,11 +24,24 @@ import java.util.Properties;
 @Intercepts({@Signature(type = Executor.class, method = Constants.UPDATE, args = {MappedStatement.class, Object.class})})
 public class OperationLogInterceptor implements Interceptor {
 
+    /** 日志的mapper不进行过滤 */
+    private static final String SELF_LOG_MAPPER = "ChangeLogsMapper";
     @Resource
     ChangeLogsMapper changeLogsMapper;
+    /** 全局开关 */
+    @Value("${globalEnable:false}")
+    private Boolean globalEnable;
+    /** 通用日志开关 */
+    @Value("${globalEnable:false}")
+    private Boolean genericLogEnable;
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
+        MappedStatement mappedStatement = (MappedStatement) invocation.getArgs()[0];
+        if (!globalEnable || mappedStatement.getResource().contains(SELF_LOG_MAPPER)) {
+            return invocation.proceed();
+        }
+
         return null;
     }
 

@@ -37,5 +37,4 @@ public class ChangeLogs {
     private Date createdAt;
     /** 更新时间 */
     private Date updatedAt;
-
 }
