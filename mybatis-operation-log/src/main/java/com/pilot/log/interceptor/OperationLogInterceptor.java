@@ -4,11 +4,10 @@ import com.pilot.log.constants.Constants;
 import com.pilot.log.dao.ChangeLogsMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.executor.Executor;
+import org.apache.ibatis.executor.statement.StatementHandler;
+import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.plugin.Interceptor;
-import org.apache.ibatis.plugin.Intercepts;
-import org.apache.ibatis.plugin.Invocation;
-import org.apache.ibatis.plugin.Signature;
+import org.apache.ibatis.plugin.*;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.Resource;
@@ -37,12 +36,33 @@ public class OperationLogInterceptor implements Interceptor {
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
-        MappedStatement mappedStatement = (MappedStatement) invocation.getArgs()[0];
-        if (!globalEnable || mappedStatement.getResource().contains(SELF_LOG_MAPPER)) {
-            return invocation.proceed();
-        }
+        // // 根据签名指定的args顺序获取具体的实现类
+        // // 获取MappedStatement实例, 并获取当前SQL命令类型
+        // MappedStatement mappedStatement = (MappedStatement) invocation.getArgs()[0];
+        // if (!globalEnable || mappedStatement.getResource().contains(SELF_LOG_MAPPER)) {
+        //     return invocation.proceed();
+        // }
+        // SqlCommandType sqlCommandType = mappedStatement.getSqlCommandType();
+        // if (Objects.nonNull(sqlCommandType)) {
+        //     try {
+        //         Executor executor = (Executor) invocation.getTarget();
+        //         Connection connection = executor.getTransaction().getConnection();
+        //
+        //     } catch (Exception e) {
+        //         log.error("数据库变更日志预处理失败。,sql:{}", "sql", e);
+        //     }
+        // }
 
-        return null;
+        StatementHandler statementHandler = (StatementHandler) invocation.getTarget();
+        BoundSql boundSql = statementHandler.getBoundSql();
+        String sql = boundSql.getSql();
+        log.info("mybatis intercept sql:{}", sql);
+        return invocation.proceed();
+    }
+
+    @Override
+    public Object plugin(Object target) {
+        return Plugin.wrap(target, this);
     }
 
     @Override
