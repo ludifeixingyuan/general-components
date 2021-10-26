@@ -17,6 +17,8 @@ public class Constants {
     public static final String KEY_LOG_ENABLE = "logEnable";
     /** KEY:默认的日志表表名 */
     public static final String KEY_DEFAULT_TABLE_NAME = "defaultTableName";
+    /** KEY:是否自动创建表 */
+    public static final String KEY_AUTO_CREATE_TABLE = "autoCreateTable";
     /** VALUE:默认的日志表表名 */
     public static final String DEFAULT_TABLE_NAME = "change_logs";
 }

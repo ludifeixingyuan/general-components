@@ -4,23 +4,28 @@ import com.pilot.log.constants.Constants;
 import com.pilot.log.enums.OperationEnum;
 import com.pilot.log.handler.AbstractOperationHandler;
 import com.pilot.log.handler.HandlerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.plugin.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StopWatch;
 
+import java.sql.Connection;
 import java.util.Locale;
 import java.util.Properties;
 
 /**
  * 日志拦截器
  *
- * @author wangzongbin
+ * @author ludifeixingyuan
  * @date 2021-10-26
  */
 @Intercepts({@Signature(type = Executor.class, method = "update", args = {MappedStatement.class, Object.class})})
+@Slf4j
 public class OperationLogInterceptor implements Interceptor {
     /** 正则匹配 insert、delete、update操作 */
     private static final String REGEX = ".*insert\\\\u0020.*|.*delete\\\\u0020.*|.*update\\\\u0020.*";
@@ -34,25 +39,38 @@ public class OperationLogInterceptor implements Interceptor {
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
-        // 拦截 {@link Executor#update(MappedStatement ms, Object parameter)} 方法
-        if (logEnable) {
-            // 拦截 Executor，强转为 Executor，默认情况下，这个Executor 是个 SimpleExecutor
-            Executor executor = (Executor) invocation.getTarget();
+        try {
+            // 获取MappedStatement实例, 并获取当前SQL命令类型
             MappedStatement mappedStatement = (MappedStatement) invocation.getArgs()[0];
-
-            if (mappedStatement.getResource().contains(Constants.SELF_LOG_MAPPER)) {
+            String sqlCommandType = mappedStatement.getSqlCommandType().name().toLowerCase();
+            OperationEnum operationEnum = OperationEnum.operationEnum.get(sqlCommandType);
+            // 未开启 || 日志的mapper || 未知操作 过滤
+            boolean flag = logEnable == Boolean.FALSE || mappedStatement.getResource().contains(Constants.SELF_LOG_MAPPER) || ObjectUtils.isEmpty(operationEnum);
+            if (flag) {
                 return invocation.proceed();
             }
+            StopWatch stopWatch = new StopWatch();
+            // 拦截 {@link Executor#update(MappedStatement ms, Object parameter)} 方法
+            // 拦截 Executor，强转为 Executor，默认情况下，这个Executor 是个 SimpleExecutor
+            Executor executor = (Executor) invocation.getTarget();
+            Connection connection = executor.getTransaction().getConnection();
+            stopWatch.start("parsing to get sql");
             //获取执行参数
             Object[] objects = invocation.getArgs();
             MappedStatement ms = (MappedStatement) objects[0];
-            String sqlCommandType = mappedStatement.getSqlCommandType().name().toLowerCase();
-            OperationEnum operationEnum = OperationEnum.operationEnum.get(sqlCommandType);
+
+
             AbstractOperationHandler handler = HandlerFactory.findEvent(operationEnum);
             handler.preHandle();
             BoundSql boundSql = ms.getSqlSource().getBoundSql(objects[1]);
             String sql = boundSql.getSql().toLowerCase(Locale.CHINA).replace("[\\t\\n\\r]", " ");
+
+            stopWatch.stop();
+
             logger.info("OperationLogInterceptor#intercept" + sql);
+            return invocation.proceed();
+        } catch (Exception e) {
+            log.error("OperationLogInterceptor#OperationLogInterceptor error", e);
         }
         return invocation.proceed();
     }
