@@ -39,11 +39,11 @@ public @interface OperationLog {
     String logTableName() default "";
 
     /**
-     * 是否开启日志。默认关闭
+     * 是否开启日志。默认开启
      *
      * @return boolean
      */
-    boolean enable() default false;
+    boolean enable() default true;
 
     /**
      * 是否开启按月分表。默认关闭

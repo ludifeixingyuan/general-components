@@ -1,8 +1,11 @@
 package com.pilot.log.interceptor;
 
+import com.pilot.log.annotion.OperationLog;
+import com.pilot.log.config.OperationLogContext;
 import com.pilot.log.constants.Constants;
+import com.pilot.log.dao.ChangeLogsMapper;
+import com.pilot.log.domain.TableHandler;
 import com.pilot.log.enums.OperationEnum;
-import com.pilot.log.handler.AbstractOperationHandler;
 import com.pilot.log.handler.HandlerFactory;
 import com.pilot.log.utils.LogUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -11,12 +14,10 @@ import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.plugin.*;
 import org.apache.ibatis.session.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StopWatch;
 
 import java.sql.Connection;
+import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -30,13 +31,14 @@ import java.util.Properties;
 public class OperationLogInterceptor implements Interceptor {
     /** 正则匹配 insert、delete、update操作 */
     private static final String REGEX = ".*insert\\\\u0020.*|.*delete\\\\u0020.*|.*update\\\\u0020.*";
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     /** 是否开启数据库日志监控，默认为false */
     private boolean logEnable;
     /** 日志监控表是否开启按月分表，默认为false。 */
     private boolean defaultTableMonthSplit;
     /** 全局日志监控表的表名，默认为change_logs */
-    private boolean defaultTableName;
+    private String defaultTableName;
+    /** 变更日志映射器 */
+    private ChangeLogsMapper changeLogsMapper;
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
@@ -46,7 +48,7 @@ public class OperationLogInterceptor implements Interceptor {
             String sqlCommandType = mappedStatement.getSqlCommandType().name().toLowerCase();
             OperationEnum operationEnum = OperationEnum.operationEnum.get(sqlCommandType);
             // 未开启 || 日志的mapper || 未知操作 过滤
-            boolean flag = logEnable == Boolean.FALSE || mappedStatement.getResource().contains(Constants.SELF_LOG_MAPPER) || ObjectUtils.isEmpty(operationEnum);
+            boolean flag = logEnable == Boolean.FALSE || mappedStatement.getResource().contains(Constants.SELF_LOG_MAPPER) || Objects.isNull(operationEnum);
             if (flag) {
                 return invocation.proceed();
             }
@@ -61,12 +63,22 @@ public class OperationLogInterceptor implements Interceptor {
             BoundSql boundSql = mappedStatement.getBoundSql(parameter);
             Configuration configuration = mappedStatement.getConfiguration();
             String sql = LogUtil.getParameterizedSql(configuration, boundSql, operationEnum);
-
-            AbstractOperationHandler handler = HandlerFactory.findEvent(operationEnum);
-            handler.preHandle();
+            log.info("OperationLogInterceptor#intercept,sql: {}", sql);
+            // 获取处理器
+            TableHandler handler = HandlerFactory.findEvent(operationEnum, connection, defaultTableName,
+                    sql, changeLogsMapper);
+            OperationLog operationLog = OperationLogContext.logAnnotationMap.get(handler.getTableName());
+            // 该表无注解 || （有注解，单关闭了日志记录的话）
+            if (Objects.isNull(operationLog) || (Objects.nonNull(operationLog) && !operationLog.enable())) {
+                return invocation.proceed();
+            }
+            // preHandle
+            handler.getHandler().preHandle();
             stopWatch.stop();
-            logger.info("OperationLogInterceptor#intercept,sql: {}", sql);
-            return invocation.proceed();
+            Object result = invocation.proceed();
+            // postHandle
+            handler.getHandler().postHandle(result);
+            return result;
         } catch (Exception e) {
             log.error("OperationLogInterceptor#OperationLogInterceptor error", e);
         }
@@ -92,6 +104,6 @@ public class OperationLogInterceptor implements Interceptor {
     @Override
     public void setProperties(Properties properties) {
         logEnable = Boolean.valueOf(properties.getProperty(Constants.KEY_LOG_ENABLE, Boolean.FALSE.toString()));
-        defaultTableName = Boolean.valueOf(properties.getProperty(Constants.KEY_DEFAULT_TABLE_NAME, Constants.DEFAULT_TABLE_NAME));
+        defaultTableName = properties.getProperty(Constants.KEY_DEFAULT_TABLE_NAME, Constants.DEFAULT_TABLE_NAME);
     }
 }
