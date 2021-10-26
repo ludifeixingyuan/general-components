@@ -4,18 +4,19 @@ import com.pilot.log.constants.Constants;
 import com.pilot.log.enums.OperationEnum;
 import com.pilot.log.handler.AbstractOperationHandler;
 import com.pilot.log.handler.HandlerFactory;
+import com.pilot.log.utils.LogUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.plugin.*;
+import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StopWatch;
 
 import java.sql.Connection;
-import java.util.Locale;
 import java.util.Properties;
 
 /**
@@ -56,18 +57,15 @@ public class OperationLogInterceptor implements Interceptor {
             Connection connection = executor.getTransaction().getConnection();
             stopWatch.start("parsing to get sql");
             //获取执行参数
-            Object[] objects = invocation.getArgs();
-            MappedStatement ms = (MappedStatement) objects[0];
-
+            Object parameter = invocation.getArgs()[1];
+            BoundSql boundSql = mappedStatement.getBoundSql(parameter);
+            Configuration configuration = mappedStatement.getConfiguration();
+            String sql = LogUtil.getParameterizedSql(configuration, boundSql, operationEnum);
 
             AbstractOperationHandler handler = HandlerFactory.findEvent(operationEnum);
             handler.preHandle();
-            BoundSql boundSql = ms.getSqlSource().getBoundSql(objects[1]);
-            String sql = boundSql.getSql().toLowerCase(Locale.CHINA).replace("[\\t\\n\\r]", " ");
-
             stopWatch.stop();
-
-            logger.info("OperationLogInterceptor#intercept" + sql);
+            logger.info("OperationLogInterceptor#intercept,sql: {}", sql);
             return invocation.proceed();
         } catch (Exception e) {
             log.error("OperationLogInterceptor#OperationLogInterceptor error", e);
