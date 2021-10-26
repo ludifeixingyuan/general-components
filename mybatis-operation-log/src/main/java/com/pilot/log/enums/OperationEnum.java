@@ -23,6 +23,8 @@ public enum OperationEnum {
     DELETE("delete"),
     /** 更新 */
     UPDATE("update"),
+    /** 查询 */
+    SELECT("select"),
     ;
 
     /** enum */
@@ -31,7 +33,7 @@ public enum OperationEnum {
     static {
         OperationEnum[] types = OperationEnum.values();
         for (OperationEnum type : types) {
-            operationEnum.put(type.name(), type);
+            operationEnum.put(type.getValue(), type);
         }
     }
 
