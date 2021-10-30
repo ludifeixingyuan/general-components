@@ -1,25 +1,24 @@
 package com.pilot.log.handler.impl;
 
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
+import com.google.common.base.CaseFormat;
+import com.google.common.collect.Maps;
 import com.pilot.log.annotations.OperationLog;
 import com.pilot.log.config.OperationLogContext;
 import com.pilot.log.constants.TableConstant;
 import com.pilot.log.dao.ChangeLogsMapper;
 import com.pilot.log.domain.ChangeLogs;
 import com.pilot.log.domain.OperatorInfo;
+import com.pilot.log.enums.FieldFormatEnums;
 import com.pilot.log.enums.OperationEnum;
 import com.pilot.log.handler.AbstractOperationHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.map.CaseInsensitiveMap;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 插入 处理器
@@ -72,15 +71,21 @@ public class InsertHandler extends AbstractOperationHandler {
                 ResultSet resultSet = statement.executeQuery(String.format(TableConstant.INSERT_SQL,
                         tableName, operationLog.primaryKey(), insertCount));
                 int columnCount = resultSet.getMetaData().getColumnCount();
+                Object primaryKeyValue = null;
                 while (resultSet.next()) {
-                    Map<String, Object> rowMap = new CaseInsensitiveMap();
+                    Map<String, Object> rowMap = Maps.newConcurrentMap();
                     for (int i = 1; i < columnCount + 1; i++) {
                         String columnName = resultSet.getMetaData().getColumnName(i);
                         Object columnValue = resultSet.getObject(i);
-                        rowMap.put(columnName, columnValue);
+                        if (operationLog.primaryKey().equals(columnName)) {
+                            primaryKeyValue = columnValue;
+                        }
+                        rowMap.put(operationLog.fieldFormat() == FieldFormatEnums.FIELD ? columnName :
+                                        CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, columnName),
+                                columnValue);
                     }
-                    ChangeLogs entity = constructChangeLogs(rowMap.get(operationLog.primaryKey()).toString(), rowMap,
-                            OperationEnum.INSERT);
+                    ChangeLogs entity = constructChangeLogs(Optional.ofNullable(primaryKeyValue).get().toString(),
+                            rowMap, OperationEnum.INSERT);
                     auditLogList.add(entity);
                 }
                 resultSet.close();

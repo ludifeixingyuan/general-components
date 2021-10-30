@@ -19,6 +19,7 @@ import org.springframework.util.StopWatch;
 
 import java.sql.Connection;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -69,7 +70,7 @@ public class OperationLogInterceptor implements Interceptor {
             // 获取处理器
             TableHandler handler = HandlerFactory.findEvent(operationEnum, connection, defaultTableName,
                     sql, changeLogsMapper);
-            OperationLog operationLog = OperationLogContext.logAnnotationMap.get(handler.getTableName());
+            OperationLog operationLog = OperationLogContext.logAnnotationMap.get(Optional.ofNullable(handler).orElse(null).getTableName());
             // 该表无注解 || （有注解，单关闭了日志记录的话）
             if (Objects.isNull(operationLog) || (Objects.nonNull(operationLog) && !operationLog.enable())) {
                 return invocation.proceed();

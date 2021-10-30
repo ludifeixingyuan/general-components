@@ -56,10 +56,10 @@ public abstract class AbstractOperationHandler {
     /**
      * 构造ChangeLogs对象
      *
-     * @param key
-     * @param data
-     * @param operationEnum
-     * @return
+     * @param key           关键
+     * @param data          数据
+     * @param operationEnum 操作枚举
+     * @return {@link ChangeLogs}
      */
     public ChangeLogs constructChangeLogs(String key, Object data, OperationEnum operationEnum) {
         return new ChangeLogs().setRelatedTable(tableName)
