@@ -1,4 +1,4 @@
-package com.pilot.log.annotion;
+package com.pilot.log.annotations;
 
 import com.pilot.log.enums.FieldFormatEnums;
 
@@ -23,6 +23,13 @@ public @interface OperationLog {
      * @return {@link String}
      */
     String tableName();
+
+    /**
+     * 主键
+     *
+     * @return {@link String}
+     */
+    String primaryKey() default "id";
 
     /**
      * 字段格式

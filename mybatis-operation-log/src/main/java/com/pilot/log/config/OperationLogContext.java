@@ -1,6 +1,6 @@
 package com.pilot.log.config;
 
-import com.pilot.log.annotion.OperationLog;
+import com.pilot.log.annotations.OperationLog;
 import com.pilot.log.handler.OperatorInfoService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +46,7 @@ public class OperationLogContext implements ApplicationContextAware {
             }
             if (Objects.nonNull(operationLog)) {
                 logAnnotationMap.put(operationLog.tableName(), operationLog);
+                table2LogMap.put(operationLog.tableName(), operationLog.logTableName());
             }
         }
 

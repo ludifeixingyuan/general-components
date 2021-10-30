@@ -1,12 +1,13 @@
 package com.pilot.log.interceptor;
 
-import com.pilot.log.annotion.OperationLog;
+import com.pilot.log.annotations.OperationLog;
 import com.pilot.log.config.OperationLogContext;
 import com.pilot.log.constants.Constants;
 import com.pilot.log.dao.ChangeLogsMapper;
 import com.pilot.log.domain.TableHandler;
 import com.pilot.log.enums.OperationEnum;
 import com.pilot.log.handler.HandlerFactory;
+import com.pilot.log.utils.ApplicationContextUtil;
 import com.pilot.log.utils.LogUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.executor.Executor;
@@ -29,8 +30,6 @@ import java.util.Properties;
 @Intercepts({@Signature(type = Executor.class, method = "update", args = {MappedStatement.class, Object.class})})
 @Slf4j
 public class OperationLogInterceptor implements Interceptor {
-    /** 正则匹配 insert、delete、update操作 */
-    private static final String REGEX = ".*insert\\\\u0020.*|.*delete\\\\u0020.*|.*update\\\\u0020.*";
     /** 是否开启数据库日志监控，默认为false */
     private boolean logEnable;
     /** 日志监控表是否开启按月分表，默认为false。 */
@@ -43,6 +42,9 @@ public class OperationLogInterceptor implements Interceptor {
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
         try {
+            if (Objects.isNull(changeLogsMapper)) {
+                changeLogsMapper = ApplicationContextUtil.getBean("changeLogsMapper");
+            }
             // 获取MappedStatement实例, 并获取当前SQL命令类型
             MappedStatement mappedStatement = (MappedStatement) invocation.getArgs()[0];
             String sqlCommandType = mappedStatement.getSqlCommandType().name().toLowerCase();

@@ -1,9 +1,16 @@
 package com.pilot.log.handler;
 
+import com.alibaba.fastjson.JSON;
+import com.pilot.log.config.OperationLogContext;
 import com.pilot.log.dao.ChangeLogsMapper;
+import com.pilot.log.domain.ChangeLogs;
 import com.pilot.log.domain.OperatorInfo;
+import com.pilot.log.enums.OperationEnum;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.Connection;
+import java.util.List;
 
 /**
  * 操作处理器
@@ -11,6 +18,7 @@ import java.sql.Connection;
  * @author ludifeixingyuan
  * @date 2021-10-18
  */
+@Slf4j
 public abstract class AbstractOperationHandler {
     /** sql */
     public String sql;
@@ -43,6 +51,58 @@ public abstract class AbstractOperationHandler {
         this.tableName = tableName;
         this.userInfo = userInfo;
         this.changeLogsMapper = changeLogsMapper;
+    }
+
+    /**
+     * 构造ChangeLogs对象
+     *
+     * @param key
+     * @param data
+     * @param operationEnum
+     * @return
+     */
+    public ChangeLogs constructChangeLogs(String key, Object data, OperationEnum operationEnum) {
+        return new ChangeLogs().setRelatedTable(tableName)
+                .setRelatedId(Long.parseLong(key))
+                .setData(JSON.toJSONString(data))
+                .setAction(operationEnum.getValue())
+                .setOperatorId(userInfo.getOperatorId().intValue())
+                .setOperatorName(userInfo.getOperatorName());
+    }
+
+    /**
+     * 获得连接
+     *
+     * @return {@link Connection}
+     */
+    public Connection getConnection() {
+        return connection;
+    }
+
+    /**
+     * 保存与mapper审计日志
+     *
+     * @param auditLogList 审计日志列表
+     */
+    public void saveAuditLogWithMapper(List<ChangeLogs> auditLogList) {
+        try {
+            changeLogsMapper.batchInsert(getRealTableName(), auditLogList);
+        } catch (Exception e) {
+            log.error("save changes error", e);
+        }
+    }
+
+    /**
+     * 获取日志表
+     *
+     * @return
+     */
+    private String getRealTableName() {
+        String realTableName = OperationLogContext.table2LogMap.get(tableName);
+        if (StringUtils.isEmpty(realTableName)) {
+            realTableName = defaultLogTableName;
+        }
+        return realTableName;
     }
 
     /**

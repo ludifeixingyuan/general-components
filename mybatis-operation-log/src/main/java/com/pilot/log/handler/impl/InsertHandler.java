@@ -1,12 +1,25 @@
 package com.pilot.log.handler.impl;
 
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
+import com.pilot.log.annotations.OperationLog;
+import com.pilot.log.config.OperationLogContext;
+import com.pilot.log.constants.TableConstant;
 import com.pilot.log.dao.ChangeLogsMapper;
+import com.pilot.log.domain.ChangeLogs;
 import com.pilot.log.domain.OperatorInfo;
+import com.pilot.log.enums.OperationEnum;
 import com.pilot.log.handler.AbstractOperationHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * 插入 处理器
@@ -18,6 +31,8 @@ import java.sql.Connection;
 public class InsertHandler extends AbstractOperationHandler {
     /** 更新语句 */
     private MySqlInsertStatement insertStatement;
+    /** 前处理 */
+    private Boolean preHandled = Boolean.FALSE;
 
     /**
      * 抽象操作处理程序
@@ -39,11 +54,52 @@ public class InsertHandler extends AbstractOperationHandler {
 
     @Override
     public void preHandle() {
-        System.out.println("执行插入请求");
+        preHandled = Boolean.TRUE;
     }
 
     @Override
     public void postHandle(Object result) {
-
+        if (preHandled) {
+            int insertCount = Integer.parseInt(result.toString());
+            if (Objects.isNull(result)) {
+                return;
+            }
+            List<ChangeLogs> auditLogList = new ArrayList<>();
+            Statement statement = null;
+            try {
+                OperationLog operationLog = OperationLogContext.logAnnotationMap.get(tableName);
+                statement = getConnection().createStatement();
+                ResultSet resultSet = statement.executeQuery(String.format(TableConstant.INSERT_SQL,
+                        tableName, operationLog.primaryKey(), insertCount));
+                int columnCount = resultSet.getMetaData().getColumnCount();
+                while (resultSet.next()) {
+                    Map<String, Object> rowMap = new CaseInsensitiveMap();
+                    for (int i = 1; i < columnCount + 1; i++) {
+                        String columnName = resultSet.getMetaData().getColumnName(i);
+                        Object columnValue = resultSet.getObject(i);
+                        rowMap.put(columnName, columnValue);
+                    }
+                    ChangeLogs entity = constructChangeLogs(rowMap.get(operationLog.primaryKey()).toString(), rowMap,
+                            OperationEnum.INSERT);
+                    auditLogList.add(entity);
+                }
+                resultSet.close();
+            } catch (SQLException e) {
+                log.error("execute insertHandler SQLException。", e);
+            } catch (Exception e) {
+                log.error("execute insertHandler Exception。", e);
+            } finally {
+                if (Objects.nonNull(statement)) {
+                    try {
+                        statement.close();
+                    } catch (SQLException e) {
+                        log.error("statement close SQLException。", e);
+                    } catch (Exception e) {
+                        log.error("statement close Exception。", e);
+                    }
+                }
+            }
+            saveAuditLogWithMapper(auditLogList);
+        }
     }
 }

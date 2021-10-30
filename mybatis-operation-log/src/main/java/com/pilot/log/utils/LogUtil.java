@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 /**
  * 日志工具类
  *
- * @author wangzongbin
+ * @author ludifeixingyuan
  * @date 2021-10-26
  */
 public class LogUtil {
