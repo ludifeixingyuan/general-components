@@ -2,7 +2,6 @@ package com.pilot.log.handler.impl;
 
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
 import com.google.common.base.CaseFormat;
-import com.google.common.collect.Maps;
 import com.pilot.log.annotations.OperationLog;
 import com.pilot.log.config.OperationLogContext;
 import com.pilot.log.constants.TableConstant;
@@ -73,7 +72,7 @@ public class InsertHandler extends AbstractOperationHandler {
                 int columnCount = resultSet.getMetaData().getColumnCount();
                 Object primaryKeyValue = null;
                 while (resultSet.next()) {
-                    Map<String, Object> rowMap = Maps.newConcurrentMap();
+                    Map<String, Object> rowMap = new HashMap<>();
                     for (int i = 1; i < columnCount + 1; i++) {
                         String columnName = resultSet.getMetaData().getColumnName(i);
                         Object columnValue = resultSet.getObject(i);

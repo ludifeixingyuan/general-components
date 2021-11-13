@@ -74,7 +74,7 @@ public class LogUtil {
      * @param sql sql
      * @return {@link String}
      */
-    private static String trimSqlWhitespaces(String sql) {
+    public static String trimSqlWhitespaces(String sql) {
         return trimPattern.matcher(sql).replaceAll(" ");
     }
 
