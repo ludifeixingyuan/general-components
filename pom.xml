@@ -13,7 +13,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>com.pilot</groupId>
+    <groupId>io.github.ludifeixingyuan</groupId>
     <artifactId>general-components</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <name>general-components</name>
