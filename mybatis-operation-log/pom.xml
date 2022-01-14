@@ -22,6 +22,7 @@
         <guava.version>28.2-jre</guava.version>
         <druid-spring-boot-starter.version>1.1.14</druid-spring-boot-starter.version>
         <fastjson.version>1.2.69</fastjson.version>
+        <commons-lang3.version>3.9</commons-lang3.version>
     </properties>
 
     <!--发布的标准，这个是按照apache的标准来做的-->
@@ -158,118 +159,7 @@
             </plugin>
         </plugins>
     </build>
-    <!--    <profiles>-->
-    <!--        <profile>-->
-    <!--            <id>release</id>-->
-    <!--            <build>-->
-    <!--                <pluginManagement>-->
-    <!--                    <plugins>-->
-    <!--                        <plugin>-->
-    <!--                            <groupId>org.sonatype.plugins</groupId>-->
-    <!--                            <artifactId>nexus-staging-maven-plugin</artifactId>-->
-    <!--                            <version>1.6.7</version>-->
-    <!--                            <extensions>true</extensions>-->
-    <!--                            <configuration>-->
-    <!--                                &lt;!&ndash; 这里的id必须要和全局配置中的release id 一致 &ndash;&gt;-->
-    <!--                                <serverId>sonatype_releases</serverId>-->
-    <!--                                <nexusUrl>https://oss.sonatype.org/</nexusUrl>-->
-    <!--                                &lt;!&ndash; 如果希望发布后自动执行close和release操作，此处可以调整为true &ndash;&gt;-->
-    <!--                                <autoReleaseAfterClose>true</autoReleaseAfterClose>-->
-    <!--                            </configuration>-->
-    <!--                        </plugin>-->
-    <!--                        <plugin>-->
-    <!--                            &lt;!&ndash; GPG &ndash;&gt;-->
-    <!--                            <groupId>org.apache.maven.plugins</groupId>-->
-    <!--                            <artifactId>maven-gpg-plugin</artifactId>-->
-    <!--                            <version>1.5</version>-->
-    <!--                            <executions>-->
-    <!--                                <execution>-->
-    <!--                                    <id>sign-artifacts</id>-->
-    <!--                                    <phase>verify</phase>-->
-    <!--                                    <goals>-->
-    <!--                                        <goal>sign</goal>-->
-    <!--                                    </goals>-->
-    <!--                                </execution>-->
-    <!--                            </executions>-->
-    <!--                        </plugin>-->
-    <!--                        &lt;!&ndash;META-INF&ndash;&gt;-->
-    <!--                        <plugin>-->
-    <!--                            <groupId>org.apache.maven.plugins</groupId>-->
-    <!--                            <artifactId>maven-jar-plugin</artifactId>-->
-    <!--                            <configuration>-->
-    <!--                                <archive>-->
-    <!--                                    <addMavenDescriptor>false</addMavenDescriptor>-->
-    <!--                                </archive>-->
-    <!--                            </configuration>-->
-    <!--                        </plugin>-->
-    <!--                        &lt;!&ndash; GPG &ndash;&gt;-->
-    <!--                        <plugin>-->
-    <!--                            <groupId>org.apache.maven.plugins</groupId>-->
-    <!--                            <artifactId>maven-gpg-plugin</artifactId>-->
-    <!--                            <version>1.5</version>-->
-    <!--                            <executions>-->
-    <!--                                <execution>-->
-    <!--                                    <id>sign-artifacts</id>-->
-    <!--                                    <phase>verify</phase>-->
-    <!--                                    <goals>-->
-    <!--                                        <goal>sign</goal>-->
-    <!--                                    </goals>-->
-    <!--                                </execution>-->
-    <!--                            </executions>-->
-    <!--                        </plugin>-->
-    <!--                        <plugin>-->
-    <!--                            <groupId>org.apache.maven.plugins</groupId>-->
-    <!--                            <artifactId>maven-compiler-plugin</artifactId>-->
-    <!--                            <version>3.0</version>-->
-    <!--                            <configuration>-->
-    <!--                                <source>1.8</source>-->
-    <!--                                <target>1.8</target>-->
-    <!--                                <encoding>UTF-8</encoding>-->
-    <!--                            </configuration>-->
-    <!--                        </plugin>-->
-    <!--                        <plugin>-->
-    <!--                            &lt;!&ndash; Source &ndash;&gt;-->
-    <!--                            <groupId>org.apache.maven.plugins</groupId>-->
-    <!--                            <artifactId>maven-source-plugin</artifactId>-->
-    <!--                            <version>2.2.1</version>-->
-    <!--                            <executions>-->
-    <!--                                <execution>-->
-    <!--                                    <id>attach-sources</id>-->
-    <!--                                    <phase>package</phase>-->
-    <!--                                    <goals>-->
-    <!--                                        <goal>jar-no-fork</goal>-->
-    <!--                                    </goals>-->
-    <!--                                </execution>-->
-    <!--                            </executions>-->
-    <!--                        </plugin>-->
-    <!--                        <plugin>-->
-    <!--                            <groupId>org.apache.maven.plugins</groupId>-->
-    <!--                            <artifactId>maven-javadoc-plugin</artifactId>-->
-    <!--                            <version>2.9.1</version>-->
-    <!--                            <configuration>-->
-    <!--                                <charset>UTF-8</charset>-->
-    <!--                                <encoding>UTF-8</encoding>-->
-    <!--                            </configuration>-->
-    <!--                            <executions>-->
-    <!--                                <execution>-->
-    <!--                                    <id>attach-javadocs</id>-->
-    <!--                                    <phase>package</phase>-->
-    <!--                                    <goals>-->
-    <!--                                        <goal>jar</goal>-->
-    <!--                                    </goals>-->
-    <!--                                </execution>-->
-    <!--                            </executions>-->
-    <!--                        </plugin>-->
-    <!--                        <plugin>-->
-    <!--                            <groupId>org.apache.maven.plugins</groupId>-->
-    <!--                            <artifactId>maven-release-plugin</artifactId>-->
-    <!--                            <version>2.5.1</version>-->
-    <!--                        </plugin>-->
-    <!--                    </plugins>-->
-    <!--                </pluginManagement>-->
-    <!--            </build>-->
-    <!--        </profile>-->
-    <!--    </profiles>-->
+
     <!--这里有两个仓库，releases和snapshots，url路径也差不多，
         选择放在什么地方主要是看我们的项目的名称是什么，
         好不我们这个项目的version是 <version>1.0-SNAPSHOT</version>
@@ -325,22 +215,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.9</version>
-        </dependency>
-        <dependency>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
+            <version>${commons-lang3.version}</version>
         </dependency>
     </dependencies>
 </project>
