@@ -5,9 +5,12 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <name>mybatis-operation-log</name>
+    <description>mybatis-operation-log</description>
     <groupId>io.github.ludifeixingyuan</groupId>
     <artifactId>mybatis-operation-log</artifactId>
-    <version>1.0.0-RELEASE</version>
+    <version>1.0.3-RELEASE</version>
+    <url>https://github.com/ludifeixingyuan/general-components</url>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -21,139 +24,268 @@
         <fastjson.version>1.2.69</fastjson.version>
     </properties>
 
+    <!--发布的标准，这个是按照apache的标准来做的-->
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
         </license>
     </licenses>
+    <!--这个和我们创建的issue相对应，
+    需要打包的项目一定要放到我们所说的地址上面，也就是说这个地址一定要是我们的，否则我们没有权限
+    tag：这个项目的分支，这里我放到了master分支里面
+    url：项目的git地址，
+    connection 和 developerConnection这两个我们也不太清楚，就按照这个格式去写吧
+    -->
     <scm>
+        <tag>master</tag>
+        <url>https://github.com/ludifeixingyuan/general-components.git</url>
         <connection>scm:git:https://github.com/ludifeixingyuan/general-components.git</connection>
         <developerConnection>scm:git:https://github.com/ludifeixingyuan/general-components.git</developerConnection>
-        <url>https://github.com/ludifeixingyuan</url>
     </scm>
+    <!--开发者：这里我们注册的时候写的名字和邮箱准确填写 ，id尽量和上面的id对应-->
     <developers>
         <developer>
+            <id>mybatis-operation-log</id>
             <name>ludifeixingyuan</name>
             <email>wangwang98k@gmail.com</email>
-            <url>https://github.com/ludifeixingyuan</url>
         </developer>
     </developers>
-    <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <!-- GPG -->
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-gpg-plugin</artifactId>
-                            <version>1.5</version>
-                            <executions>
-                                <execution>
-                                    <id>sign-artifacts</id>
-                                    <phase>verify</phase>
-                                    <goals>
-                                        <goal>sign</goal>
-                                    </goals>
-                                </execution>
-                            </executions>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-                <plugins>
-                    <!--META-INF-->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-jar-plugin</artifactId>
-                        <configuration>
-                            <archive>
-                                <addMavenDescriptor>false</addMavenDescriptor>
-                            </archive>
-                        </configuration>
-                    </plugin>
-                    <!-- GPG -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.5</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.0</version>
-                        <configuration>
-                            <source>1.8</source>
-                            <target>1.8</target>
-                            <encoding>UTF-8</encoding>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <!-- Source -->
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>2.2.1</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.9.1</version>
-                        <configuration>
-                            <charset>UTF-8</charset>
-                            <encoding>UTF-8</encoding>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-release-plugin</artifactId>
-                        <version>2.5.1</version>
-                    </plugin>
-                </plugins>
+    <!--打包所需要的插件-->
+    <build>
+        <plugins>
+            <!-- 源码 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Javadoc 这个好像没有办法使用，就换成了另外的-->
+            <!--<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <configuration>
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>-->
 
-            </build>
-        </profile>
-    </profiles>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <show>private</show>
+                    <nohelp>true</nohelp>
+                    <charset>UTF-8</charset>
+                    <encoding>UTF-8</encoding>
+                    <docencoding>UTF-8</docencoding>
+                    <doclint>none</doclint>
+                    <tags>
+                        <tag>
+                            <!-- 处理@date标签 -->
+                            <name>date</name>
+                            <placement>a</placement>
+                        </tag>
+                    </tags>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--部署-->
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>deploy</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- GPG 打包插件-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--将组件部署到OSSRH并将其发布到Central Repository-->
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.7</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <!--这里和我们此前在maven的server中配置的id一致-->
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <!--    <profiles>-->
+    <!--        <profile>-->
+    <!--            <id>release</id>-->
+    <!--            <build>-->
+    <!--                <pluginManagement>-->
+    <!--                    <plugins>-->
+    <!--                        <plugin>-->
+    <!--                            <groupId>org.sonatype.plugins</groupId>-->
+    <!--                            <artifactId>nexus-staging-maven-plugin</artifactId>-->
+    <!--                            <version>1.6.7</version>-->
+    <!--                            <extensions>true</extensions>-->
+    <!--                            <configuration>-->
+    <!--                                &lt;!&ndash; 这里的id必须要和全局配置中的release id 一致 &ndash;&gt;-->
+    <!--                                <serverId>sonatype_releases</serverId>-->
+    <!--                                <nexusUrl>https://oss.sonatype.org/</nexusUrl>-->
+    <!--                                &lt;!&ndash; 如果希望发布后自动执行close和release操作，此处可以调整为true &ndash;&gt;-->
+    <!--                                <autoReleaseAfterClose>true</autoReleaseAfterClose>-->
+    <!--                            </configuration>-->
+    <!--                        </plugin>-->
+    <!--                        <plugin>-->
+    <!--                            &lt;!&ndash; GPG &ndash;&gt;-->
+    <!--                            <groupId>org.apache.maven.plugins</groupId>-->
+    <!--                            <artifactId>maven-gpg-plugin</artifactId>-->
+    <!--                            <version>1.5</version>-->
+    <!--                            <executions>-->
+    <!--                                <execution>-->
+    <!--                                    <id>sign-artifacts</id>-->
+    <!--                                    <phase>verify</phase>-->
+    <!--                                    <goals>-->
+    <!--                                        <goal>sign</goal>-->
+    <!--                                    </goals>-->
+    <!--                                </execution>-->
+    <!--                            </executions>-->
+    <!--                        </plugin>-->
+    <!--                        &lt;!&ndash;META-INF&ndash;&gt;-->
+    <!--                        <plugin>-->
+    <!--                            <groupId>org.apache.maven.plugins</groupId>-->
+    <!--                            <artifactId>maven-jar-plugin</artifactId>-->
+    <!--                            <configuration>-->
+    <!--                                <archive>-->
+    <!--                                    <addMavenDescriptor>false</addMavenDescriptor>-->
+    <!--                                </archive>-->
+    <!--                            </configuration>-->
+    <!--                        </plugin>-->
+    <!--                        &lt;!&ndash; GPG &ndash;&gt;-->
+    <!--                        <plugin>-->
+    <!--                            <groupId>org.apache.maven.plugins</groupId>-->
+    <!--                            <artifactId>maven-gpg-plugin</artifactId>-->
+    <!--                            <version>1.5</version>-->
+    <!--                            <executions>-->
+    <!--                                <execution>-->
+    <!--                                    <id>sign-artifacts</id>-->
+    <!--                                    <phase>verify</phase>-->
+    <!--                                    <goals>-->
+    <!--                                        <goal>sign</goal>-->
+    <!--                                    </goals>-->
+    <!--                                </execution>-->
+    <!--                            </executions>-->
+    <!--                        </plugin>-->
+    <!--                        <plugin>-->
+    <!--                            <groupId>org.apache.maven.plugins</groupId>-->
+    <!--                            <artifactId>maven-compiler-plugin</artifactId>-->
+    <!--                            <version>3.0</version>-->
+    <!--                            <configuration>-->
+    <!--                                <source>1.8</source>-->
+    <!--                                <target>1.8</target>-->
+    <!--                                <encoding>UTF-8</encoding>-->
+    <!--                            </configuration>-->
+    <!--                        </plugin>-->
+    <!--                        <plugin>-->
+    <!--                            &lt;!&ndash; Source &ndash;&gt;-->
+    <!--                            <groupId>org.apache.maven.plugins</groupId>-->
+    <!--                            <artifactId>maven-source-plugin</artifactId>-->
+    <!--                            <version>2.2.1</version>-->
+    <!--                            <executions>-->
+    <!--                                <execution>-->
+    <!--                                    <id>attach-sources</id>-->
+    <!--                                    <phase>package</phase>-->
+    <!--                                    <goals>-->
+    <!--                                        <goal>jar-no-fork</goal>-->
+    <!--                                    </goals>-->
+    <!--                                </execution>-->
+    <!--                            </executions>-->
+    <!--                        </plugin>-->
+    <!--                        <plugin>-->
+    <!--                            <groupId>org.apache.maven.plugins</groupId>-->
+    <!--                            <artifactId>maven-javadoc-plugin</artifactId>-->
+    <!--                            <version>2.9.1</version>-->
+    <!--                            <configuration>-->
+    <!--                                <charset>UTF-8</charset>-->
+    <!--                                <encoding>UTF-8</encoding>-->
+    <!--                            </configuration>-->
+    <!--                            <executions>-->
+    <!--                                <execution>-->
+    <!--                                    <id>attach-javadocs</id>-->
+    <!--                                    <phase>package</phase>-->
+    <!--                                    <goals>-->
+    <!--                                        <goal>jar</goal>-->
+    <!--                                    </goals>-->
+    <!--                                </execution>-->
+    <!--                            </executions>-->
+    <!--                        </plugin>-->
+    <!--                        <plugin>-->
+    <!--                            <groupId>org.apache.maven.plugins</groupId>-->
+    <!--                            <artifactId>maven-release-plugin</artifactId>-->
+    <!--                            <version>2.5.1</version>-->
+    <!--                        </plugin>-->
+    <!--                    </plugins>-->
+    <!--                </pluginManagement>-->
+    <!--            </build>-->
+    <!--        </profile>-->
+    <!--    </profiles>-->
+    <!--这里有两个仓库，releases和snapshots，url路径也差不多，
+        选择放在什么地方主要是看我们的项目的名称是什么，
+        好不我们这个项目的version是 <version>1.0-SNAPSHOT</version>
+        那么就会放到snapshots这个仓库里面，如果是以RELEASES的话就会发布到另外一个仓库
+    -->
     <distributionManagement>
+        <repository>
+            <!--与settings.xml的server.id保持一致-->
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/releases/</url>
+        </repository>
         <snapshotRepository>
-            <id>nexus-snapshots</id>
-            <name>Nexus Snapshot Repository</name>
-            <uniqueVersion>false</uniqueVersion>
+            <!--与settings.xml的server.id保持一致-->
+            <id>ossrh</id>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
         </snapshotRepository>
-        <repository>
-            <id>nexus-releases</id>
-            <name>Nexus Release Repository</name>
-            <uniqueVersion>false</uniqueVersion>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
     </distributionManagement>
 
     <dependencies>
@@ -194,6 +326,21 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.9</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>1.6.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
         </dependency>
     </dependencies>
 </project>
